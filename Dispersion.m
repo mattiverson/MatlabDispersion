@@ -1,22 +1,26 @@
 %Problem Parameters
 R1 = [1 1; 0 2];
 R2 = [0 2; 1 1];
-k1 = 3.5e-5;
-k2 = 1.0e-8;
+k1 = 3.5e-2;
+k2 = 1.0e-3;
 
 %Computation Parameters
 n = 20;
-ticksToRun = 1000;
+ticksToRun = 150;
 dispRate = 0.05;
 isq2 = 1/sqrt(2);
 
 %Animation Parameters
 framerate = 5;
-period = 20;
+period = 10;
 
 %Initial State
 range = linspace(0,1,n);
 [x, y] = meshgrid(range, range);
+C1Initial = 2*sin(pi*x) .* sin(pi*y);
+C2Initial = sin(pi*x);
+C(:,1) = reshape(C1Initial, n^2, 1);
+C(:,2) = reshape(C2Initial, n^2, 1);
 
 
 %Dispersion Matrix (Don't touch)
@@ -52,15 +56,15 @@ r2Dep = zeros(1,3);
 r1Dep((R1(1,1) ~= 0) + 2*(R1(1,2) ~= 0)) = 1;
 r2Dep((R2(1,1) ~= 0) + 2*(R2(1,2) ~= 0)) = 1;
 
-C = zeros(n^2,2);
-C(1,1) = n^2 / 2;
-C(end,2) = n^2 / 2;
-shading interp
+
+%C(1,1) = n^2 / 2;
+%C(end,2) = n^2 / 2;
 
 t = 0;
 startTime = clock;
 while t<ticksToRun
     %dispersion
+    
     C = DMat*C;
     
     %reaction 1
@@ -95,42 +99,49 @@ while t<ticksToRun
     
     %add back reaction results
     C = C - r1In - r2In + r1Out + r2Out;
-    t = t + 1;
+    
     %draw results
+    %performace note: the graphics code takes roughly 1000x longer than
+    %the computations in a tick
     if mod(t, period) == 0
         fprintf("Tick %d done \n", t);
         figure(1)
+        %colormap gray
         surf(x,y, reshape(log(C(:,1) + 1e-12),n,n))
         shading interp;
         view(2)
-        %caxis([0 1]);
-        colorbar;
         title("Log of Concentration of Chemical 1")
+        colorbar;
+        
         figure(2)
+        %colormap gray
         surf(x,y, reshape(log(C(:,2) + 1e-12),n,n))
         shading interp;
         view(2)
-        %caxis([0 1]);
         title("Log of Concentration of Chemical 2")
         colorbar;
+        
         figure(3)
+        %colormap gray
         surf(x,y, reshape(log(r1Rate + 1e-12),n,n))
         shading interp;
         view(2)
         title("Log of Rate of Reaction 1")
         colorbar;
+        
         figure(4)
+        %colormap gray
         surf(x,y, reshape(log(r2Rate + 1e-12),n,n))
         shading interp;
         view(2)
         title("Log of Rate of Reaction 2")
         colorbar;
+        
         endTime = clock;
         duration = endTime(6)-startTime(6);
-        fprintf("%.1f", duration*1000);
-        pause(max(1/framerate - duration, 0));
-        %pause;
+        pause(min(0.5, max(1/framerate - duration, 0)));
         startTime = clock;
     end
+    t = t + 1;
 end
 disp("Done")
