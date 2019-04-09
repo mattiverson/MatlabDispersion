@@ -7,7 +7,6 @@ k = [3.5e-2 1e-3];
 n = 40;
 ticksToRun = 150;
 dispRate = 0.05;
-isq2 = 1/sqrt(2);
 
 %Animation Parameters
 period = ticksToRun - 1;

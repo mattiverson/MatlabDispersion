@@ -1,7 +1,11 @@
 function [DMat] = DispersionMatrix(n, dispRate)
-%DISPERSIONMATRIX Summary of this function goes here
-%   Detailed explanation goes here
+%DISPERSIONMATRIX Builds Dispersion matrix for given n and dispRate.
+%   Uses tensor products to create a sparse n^2 x n^2 matrix D such that
+%   D*C (where each column of C represents the contents of an nxn grid)
+%   gives C after one tick of dispersion.
 
+
+isq2 = 1/sqrt(2);
 %sets up matrices to handle dispersion within the same row and with
 %adjacent row
 sameRowMat = gallery('tridiag', n, dispRate, 1-(4+4*isq2)*dispRate, dispRate);
